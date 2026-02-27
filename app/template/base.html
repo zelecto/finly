@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FINLY - {% block title %}{% endblock %}</title>
+
+    <!-- Favicon (logo en la pestaña) -->
+    <link
+      rel="icon"
+      type="image/ico"
+      href="{{ url_for('static', filename='ICON.ico') }}"
+    />
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/main.css') }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      integrity="sha512-..."
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <style>
+      .logout-icon {
+        position: absolute;
+        top: 20px;
+        right: 25px;
+        text-decoration: none;
+        font-size: 1.5rem;
+        color: #041933;
+        transition:
+          transform 0.2s,
+          color 0.2s;
+      }
+      .logout-icon:hover {
+        color: #7a9fcc;
+        transform: scale(1.2);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <img
+          src="{{ url_for('static', filename='logo.png') }}"
+          alt="FINLY Logo"
+          class="logo-sidebar"
+        />
+        <span class="sidebar-title">FINLY</span>
+        <button class="close-btn" onclick="toggleSidebar()">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <ul class="sidebar-menu">
+        <li>
+          <a href="/"><i class="fa fa-home"></i> Inicio</a>
+        </li>
+      </ul>
+
+      <!-- PRIMER CORTE -->
+      <div class="section-header">→ Primer Corte</div>
+      <ul class="sidebar-menu">
+        <li>
+          <a href="/interes"
+            ><i class="fa-solid fa-dollar-sign"></i> Tasa de Interés</a
+          >
+        </li>
+        <li>
+          <a href="/simple"><i class="fa fa-chart-line"></i> Interés simple</a>
+        </li>
+        <li>
+          <a href="/compuesto"
+            ><i class="fa fa-chart-pie"></i> Interés Compuesto</a
+          >
+        </li>
+        <li>
+          <a href="/anualidades"
+            ><i class="fa-solid fa-calendar-alt"></i> Anualidades</a
+          >
+        </li>
+      </ul>
+
+      <!-- CERRAR SESIÓN -->
+      <ul class="sidebar-menu">
+        <li>
+          <a href="/logout"
+            ><i class="fa fa-arrow-right-from-bracket"></i> Cerrar Sesión</a
+          >
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Botón hamburguesa -->
+    <button class="hamburger" onclick="toggleSidebar()">
+      <i class="fa fa-bars"></i>
+    </button>
+
+    <div class="main-content">{% block content %} {% endblock %}</div>
+    <script>
+      function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("active");
+      }
+    </script>
+  </body>
+</html>
