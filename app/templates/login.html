@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FINLY - Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+  <link rel="icon" type="image/ico" href="{{ url_for('static', filename='ICON.ico') }}">
+</head>
+
+<body>
+  <div class="container login-container">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="FINLY" class="logo-login">
+        
+        <h1 class="welcome-text">Bienvenido</h1>
+        <p class="subtitle-login">Decide con inteligencia, calcula con precisión.</p>
+
+        <!-- Formulario -->
+        <form class="form login-form" id="loginForm">
+            <div class="input-group">
+                <label for="username">Cédula</label>
+                <input type="text" id="username" required autocomplete="username">
+            </div>
+
+            <div class="input-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" required autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="btn btn-login" id="loginBtn">Iniciar Sesión</button>
+        </form>
+    <!-- Botón de login con Google -->
+        <button class="btn-google" onclick="loginGoogle()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo">
+        Iniciar sesión con Google
+        </button>
+        <!-- Links extras -->
+        <div class="extra-links">
+            <a href="/forgot-password" class="forgot-link">¿Olvidaste tu contraseña?</a>
+            <p>
+                ¿No tienes una cuenta? 
+                <a href="/registro">Regístrate</a>
+            </p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+    </div>
+
+  <!-- ================= FIREBASE SDK ================= -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAoz8Ybmc-_GpLrYr_JVM5_886iAR6YM6w",
+      authDomain: "economica-99fed.firebaseapp.com",
+      projectId: "economica-99fed",
+      storageBucket: "economica-99fed.firebasestorage.app",
+      messagingSenderId: "1030723751213",
+      appId: "1:1030723751213:web:efbbee7cc98ea34b93d7a4",
+      measurementId: "G-75LB682YQB"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    window.loginGoogle = async function () {
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+
+        console.log("Usuario autenticado:", user);
+
+        const response = await fetch("/google-login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            name: user.displayName,
+            email: user.email 
+          })
+        });
+        const data = await response.json();
+        console.log("Respuesta del backend:", data);
+
+        if (response.ok && data.success) {
+          alert("✅ Bienvenido " + user.displayName);
+          window.location.href = "/"; 
+        } else {
+          alert("❌ Error: " + (data.error || "Error desconocido"));
+        }
+      } catch (error) {
+        console.error("Error en login con Google:", error);
+        alert("Error: " + error.message);
+      }
+    };
+  </script>
+
+  <!-- ================= JS MODIFICADO PARA FASTAPI ================= -->
+   <script>
+    const loginForm = document.getElementById('loginForm');
+    const loginBtn = document.getElementById('loginBtn');
+    const errorMessage = document.getElementById('errorMessage');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+
+    loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        errorMessage.style.display = 'none';
+        usernameInput.classList.remove('error');
+        passwordInput.classList.remove('error');
+
+        const cedula = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        if (!cedula || !password) {
+            showError('Por favor completa todos los campos');
+            if (!cedula) usernameInput.classList.add('error');
+            if (!password) passwordInput.classList.add('error');
+            return;
+        }
+
+        loginBtn.classList.add('loading');
+        loginBtn.disabled = true;
+
+        try {
+            // CAMBIO PRINCIPAL: usar la API de FastAPI
+            const response = await fetch("http://127.0.0.1:5000/validar_login", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    cedula: cedula,      // Formato correcto para FastAPI
+                    password: password
+                })
+            });
+
+            const result = await response.json();
+            console.log('Respuesta del servidor:', result); // Para debug
+
+            if (response.ok && result.success) {
+                alert(result.message || "Login exitoso");
+                
+                // Crear sesión en Flask después del login exitoso
+                const sessionResponse = await fetch("/create-session", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cedula: cedula })
+                });
+
+                if (sessionResponse.ok) {
+                    window.location.href = '/inicio';
+                } else {
+                    window.location.href = '/inicio'; // Intentar de todos modos
+                }
+            } else {
+                showError(result.detail || result.error || 'Credenciales inválidas');
+                usernameInput.classList.add('error');
+                passwordInput.classList.add('error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showError('Error de conexión con el servidor');
+        } finally {
+            loginBtn.classList.remove('loading');
+            loginBtn.disabled = false;
+        }
+    });
+
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = 'block';
+    }
+
+    usernameInput.addEventListener('input', function() {
+        this.classList.remove('error');
+        if (errorMessage.style.display === 'block') {
+            errorMessage.style.display = 'none';
+        }
+    });
+
+    passwordInput.addEventListener('input', function() {
+        this.classList.remove('error');
+        if (errorMessage.style.display === 'block') {
+            errorMessage.style.display = 'none';
+        }
+    });
+</script>
+
+</body>
+</html>
