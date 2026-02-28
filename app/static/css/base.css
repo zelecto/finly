@@ -1,11 +1,11 @@
 :root {
   --primary-dark: #041933;
   --primary-medium: #143966;
-  --primary-light: #3D6799;
-  --primary-lighter: #7A9FCC;
+  --primary-light: #3d6799;
+  --primary-lighter: #7a9fcc;
 
-  --white: #FFFFFF;
-  --light-gray: #F8F8F8;
+  --white: #ffffff;
+  --light-gray: #f8f8f8;
   --black: #000000;
 
   --shadow: 0 4px 12px rgba(4, 25, 51, 0.1);
@@ -23,10 +23,17 @@
 }
 
 body {
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   background-color: var(--light-gray);
   color: var(--primary-medium);
   line-height: 1.6;
   padding: 20px 10px;
+  margin-left: 240px; /* Espacio para el sidebar en desktop */
+  transition: margin-left 0.3s ease;
 }
 
+@media (max-width: 768px) {
+  body {
+    margin-left: 0; /* Sin margen en móviles */
+  }
+}

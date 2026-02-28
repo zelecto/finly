@@ -55,16 +55,16 @@
   display: none; /* Oculto en desktop */
 }
 
-/* === ENCABEZADOS DE SECCIÓN (PRIMER/SEGUNDO CORTE) === */
+/* === ENCABEZADOS DE SECCIÓN === */
 .section-header {
   padding: 15px 20px 8px 20px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  color: #5a9bd5;
+  color: #7a9fcc;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.2px;
   margin-top: 10px;
-  border-bottom: 1px solid rgba(90, 155, 213, 0.3);
+  border-bottom: 1px solid rgba(122, 159, 204, 0.3);
 }
 
 .section-header:first-of-type {
@@ -76,7 +76,6 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  flex-grow: 1;
 }
 
 .sidebar-menu li {
@@ -94,6 +93,13 @@
 
 .sidebar-menu li a:hover {
   background: #3d6799;
+}
+
+/* Menú inferior (cerrar sesión) pegado al final */
+.sidebar-menu-bottom {
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 10px;
 }
 
 /* === BOTÓN HAMBURGUESA === */
