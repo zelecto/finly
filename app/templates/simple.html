@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Interés Simple{% endblock %}
+
+{% block content %}
+<!-- Contenido principal -->
+<div class="container">
+    <!-- Header -->
+    <div class="header-small">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="FINLY Logo" class="logo-small">
+        <h1>📈 Interés Simple</h1>
+        <span class="user-info">{{ username }}</span>
+    </div>
+
+<div class="teoria-section">
+        <button class="teoria-toggle" type="button" id="teoriaBtn">
+            <span id="teoriaIcon">▶</span> Teoría: ¿Qué es el Interés Simple?
+        </button>
+        <div class="teoria-content" id="teoriaContent">
+            <h3>💡 Conceptos Básicos</h3>
+            <p><strong>El interés simple</strong> es el interés que se calcula sobre el capital inicial durante todo el período de la inversión.</p>
+            
+            <h4>Fórmula Principal:</h4>
+            <div class="formula-box">
+                <strong>M = P + I</strong><br>
+                <strong>I = P × i × t</strong><br>
+                Donde: <strong>M = P(1 + i × t)</strong>
+            </div>
+
+            <h4>Variables:</h4>
+            <ul>
+                <li><strong>P (Capital):</strong> Dinero inicial invertido</li>
+                <li><strong>i (Tasa):</strong> Porcentaje de interés anual (en decimal)</li>
+                <li><strong>t (Tiempo):</strong> Período en años</li>
+                <li><strong>M (Monto):</strong> Capital final = Capital + Interés</li>
+                <li><strong>I (Interés):</strong> Ganancia generada</li>
+            </ul>
+        </div>
+    </div>
+
+    <p class="instruction">Completa <strong>3 campos</strong> y deja <strong>1 vacío</strong>. FINLY calculará automáticamente el campo faltante.</p>
+
+    <form class="form" id="simpleForm">
+        <div class="input-row">
+            <div class="input-group">
+                <label>Capital Inicial (P):</label>
+                <input type="number" id="capital" step="0.01" placeholder="Ej. 1000">
+                <small>Dinero inicial a invertir</small>
+            </div>
+
+            <div class="input-group">
+                <label>Tasa de Interés (% anual):</label>
+                <input type="number" id="tasa" step="0.01" placeholder="Ej. 5">
+                <small>Porcentaje de ganancia anual</small>
+            </div>
+        </div>
+
+        <div class="input-row">
+            <div class="input-group">
+                <label>Tiempo:</label>
+                <div class="time-inputs">
+                    <input type="number" id="tiempo_dias" step="1" placeholder="Días">
+                    <input type="number" id="tiempo_meses" step="1" placeholder="Meses">
+                    <input type="number" id="tiempo_anios" step="1" placeholder="Años">
+                </div>
+                <small>Duración de la inversión</small>
+            </div>
+
+            <div class="input-group">
+                <label>Monto Final (M):</label>
+                <input type="number" id="monto" step="0.01" placeholder="Ej. 1100">
+                <small>Dinero total al final</small>
+            </div>
+        </div>
+
+        <button type="submit" class="btn" id="calcularBtn">🧮 Calcular Automáticamente</button>
+    </form>
+
+    <div class="result-box hidden" id="resultBox">
+    <div class="result-content">
+        <h3>💰 Resultado:</h3>
+        <div class="result-detail" id="resultValue"></div> 
+        <div class="result-detail" id="resultDetail"></div>
+        <div class="result-detail" id="interestDetail"></div>
+    </div>
+</div>
+
+
+    <a href="/" class="btn-back">⬅ Volver al Menú</a>
+</div>
+<script>
+    // Función para toggle de teoría
+    document.getElementById('teoriaBtn').addEventListener('click', function() {
+        const content = document.getElementById('teoriaContent');
+        const icon = document.getElementById('teoriaIcon');
+        
+        content.classList.toggle('show');
+        icon.classList.toggle('rotated');
+    });
+
+    const form = document.getElementById('simpleForm');
+    const capitalInput = document.getElementById('capital');
+    const tasaInput = document.getElementById('tasa');
+    const tiempoDiasInput = document.getElementById('tiempo_dias');
+    const tiempoMesesInput = document.getElementById('tiempo_meses');
+    const tiempoAniosInput = document.getElementById('tiempo_anios');
+    const montoInput = document.getElementById('monto');
+    const resultBox = document.getElementById('resultBox');
+    const resultValue = document.getElementById('resultValue');
+    const resultDetail = document.getElementById('resultDetail');
+    const interestDetail = document.getElementById('interestDetail');
+
+    // ⚡️ Pega aquí tu URL pública de ngrok
+    const API_URL = "http://127.0.0.1:5000/calcular_Interes_Simple";
+
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const tiempoLleno = tiempoDiasInput.value || tiempoMesesInput.value || tiempoAniosInput.value;
+
+        let filled = 0;
+        if (capitalInput.value) filled++;
+        if (tasaInput.value) filled++;
+        if (tiempoLleno) filled++;
+        if (montoInput.value) filled++;
+
+        if (filled !== 3) {
+            resultBox.classList.remove('hidden');
+            resultValue.innerText = "⚠ Validación incorrecta";
+            resultDetail.innerText = "Debes completar exactamente 3 campos y dejar 1 vacío.";
+            interestDetail.innerText = "";
+            return;
+        }
+
+        // Crear objeto con los datos
+        const payload = {
+            Vi: capitalInput.value ? parseFloat(capitalInput.value) : null,
+            i: tasaInput.value ? parseFloat(tasaInput.value) : null,
+            t_d: tiempoDiasInput.value ? parseInt(tiempoDiasInput.value) : null,
+            t_m: tiempoMesesInput.value ? parseInt(tiempoMesesInput.value) : null,
+            t_a: tiempoAniosInput.value ? parseInt(tiempoAniosInput.value) : null,
+            Vf: montoInput.value ? parseFloat(montoInput.value) : null
+        };
+
+        try {
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            resultBox.classList.remove('hidden');
+            if (response.ok) {
+                // Si esperas Vf
+                if (data.Vf !== undefined) {
+                    resultDetail.innerText = ` Monto final: ${data.Vf[0]}
+                    Interes: ${data.Vf[1]}`;
+                }
+                // Si esperas Vi
+                else if (data.Vi !== undefined) {
+                    resultDetail.innerText = `${data.Vi}`;
+                }
+                // Si esperas tiempo
+                else if (data.t !== undefined) {
+                    const porcentaje =(data.t*100)
+                    resultDetail.innerText = `${porcentaje.toFixed(3)}`;
+                }
+                else {
+                    resultDetail.innerText = "No se pudo calcular.";
+                }
+
+                interestDetail.innerText = "Cálculo realizado correctamente.";
+            } else {
+                resultValue.innerText = "⚠ Error en el cálculo";
+                resultDetail.innerText = data.detail || "Ocurrió un error inesperado.";
+                interestDetail.innerText = "";
+            }
+        } catch (error) {
+            resultBox.classList.remove('hidden');
+            resultValue.innerText = "⚠ Error de conexión";
+            resultDetail.innerText = "No se pudo conectar con la API.";
+            interestDetail.innerText = error.toString();
+        }
+    });
+</script>
+
+{% endblock %}
