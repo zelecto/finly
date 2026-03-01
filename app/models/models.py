@@ -60,3 +60,23 @@ class Interes_Simple(BaseModel):
                 raise ValueError("Faltan Vf, Vi o i para calcular el tiempo")
             self.t = ((self.Vf / self.Vi) - 1) /(self.i/100)
             return self.t
+
+    
+class Interes_compuesto(BaseModel):
+    Vf:opcional[float]=None
+    Vp:opcional[float]=None
+    i:opcional[float]=None
+    n:opcional[float]=None
+
+    def calcular_valor_futuro(self):
+        self.Vf=self.Vp*math.pow((1+(self.i/100)),self.n)
+        return self.Vf
+    
+    def calcular_tasa_de_interes(self):
+        self.i=math.pow((self.Vf/self.Vp),(1/self.n))-1
+        return self.i*100
+    
+    def calcular_tiempo_necesario(self):
+        self.n=(math.log(self.Vf)-math.log(self.Vp))/math.log(1+(self.i/100))
+        return self.n
+
